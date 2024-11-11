@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arctos">
+
+
+<xacro:macro name="arctos_link" params="name origin_xyz origin_rpy material_name inertia_origin_xyz inertia_origin_rpy mass ixx iyy izz ixy iyz ixz">
+  <link name="${name}">
+    <visual>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <geometry>
+        <mesh filename="package://arctos_description/meshes/${name}.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="${material_name}"/>
+    </visual>
+    <collision>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <geometry>
+        <mesh filename="package://arctos_description/meshes/${name}.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="${inertia_origin_xyz}" rpy="${inertia_origin_rpy}"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${ixx}" iyy="${iyy}" izz="${izz}" ixy="${ixy}" iyz="${iyz}" ixz="${ixz}"/>
+    </inertial>
+  </link>
+</xacro:macro>
+
+
+<xacro:macro name="arctos_joint" params="name type parent child origin_xyz origin_rpy axis_xyz limit_u limit_l limit_e limit_v">
+  <joint name="${name}" type="${type}">
+    <parent link="${parent}"/>
+    <child link="${child}"/>
+    <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+    <axis xyz="${axis_xyz}"/>
+    <limit upper="${limit_u}" lower="${limit_l}" effort="${limit_e}" velocity="${limit_v}"/>
+  </joint>
+</xacro:macro>
+
+
+<xacro:macro name="transmission" params="name joint_name actuator_name">
+  <transmission name="${name}">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${joint_name}">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${actuator_name}">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+</xacro:macro>
+
+<xacro:macro name="transmission_effort" params="name joint_name actuator_name">
+  <transmission name="${name}">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${joint_name}">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${actuator_name}">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+</xacro:macro>
+
+</robot>
