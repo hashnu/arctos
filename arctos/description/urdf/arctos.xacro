@@ -1,9 +1,18 @@
 <?xml version="1.0" ?>
 <robot name="arctos" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<xacro:include filename="$(find arctos_description)/urdf/materials.xacro" />
-<xacro:include filename="$(find arctos_description)/urdf/joint_link.xacro"/>
-<!--xacro:include filename="$(find arctos_description)/urdf/arctos_gripper.xacro"/-->
+<xacro:include filename="$(find arctos)/urdf/materials.xacro" />
+<xacro:include filename="$(find arctos)/urdf/joint_link.xacro"/>
+
+<link name="world"/>
+
+  <!-- base_joint fixes base_link to the environment -->
+  <joint name="base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
 
 <xacro:arctos_link 
     name="base_link" 
@@ -63,12 +72,10 @@
     name="Link_6_1" 
     origin_xyz="0.0 0.323 -0.5685" origin_rpy="0 0 0" 
     material_name="white" 
-    inertia_origin_xyz="-0.001 -0.0211 0.0" inertia_origin_rpy="0 0 0" 
-    mass="0.2858" 
-    ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="-0.0" iyz="0.0" ixz="0.0"
+    inertia_origin_xyz="-0.0 -0.0 0.0" inertia_origin_rpy="0.0 0.0 0.0" 
+    mass="1e-3" 
+    ixx="1e-3" iyy="1e-3" izz="1e-3" ixy="-0.0" iyz="0.0" ixz="0.0"
 />
-
-<!--xacro:gripper parent="Link_6_1" origin_xyz="0.0 -0.006085 0.0" /-->
 
 <xacro:arctos_joint
   name="X_joint" type="continuous"
@@ -117,11 +124,7 @@
   limit_u="${pi}" limit_l="${-pi}" limit_e="16.0" limit_v="3.0"
 />
 
-<xacro:transmission name="X_tran" joint_name="X_joint" actuator_name="X_actr"/>
-<xacro:transmission name="Y_tran" joint_name="Y_joint" actuator_name="Y_actr"/>
-<xacro:transmission name="B_tran" joint_name="B_joint" actuator_name="B_actr"/>
-<xacro:transmission name="Z_tran" joint_name="Z_joint" actuator_name="Z_actr"/>
-<xacro:transmission name="A_tran" joint_name="A_joint" actuator_name="A_actr"/>
-<xacro:transmission name="C_tran" joint_name="C_joint" actuator_name="C_actr"/>
+<!--xacro:include filename="$(find arctos)/urdf/arctos_gripper.xacro"/-->
+<xacro:include filename="$(find arctos)/urdf/arctos_control.xacro"/>
 
 </robot>

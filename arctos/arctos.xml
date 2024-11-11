@@ -1,0 +1,16 @@
+<library path="arctos">
+  <class name="arctos/RobotSystem"
+         type="arctos::RobotSystem"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Arctos arm hardware plugin
+    </description>
+  </class>
+  <class name="arctos/RobotController"
+         type="arctos::RobotController"
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Arctos arm hardware controller plugin
+    </description>
+  </class>
+</library>
