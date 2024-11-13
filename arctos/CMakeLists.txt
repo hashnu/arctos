@@ -73,6 +73,14 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
 )
 
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(PROGRAMS
+  arctos/scripts/set_joints_zero_positions.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ## EXPORTS
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(pluginlib  rcpputils hardware_interface controller_interface realtime_tools trajectory_msgs controller_manager)
