@@ -5,10 +5,9 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-
-arctos_controller:
+forward_position_controller:
   ros__parameters:
-    type: arctos/RobotController
+    type: forward_command_controller/ForwardCommandController
     joints:
       - X_joint
       - Y_joint
@@ -16,11 +15,4 @@ arctos_controller:
       - A_joint
       - B_joint
       - C_joint
-
-    command_interfaces:
-      - position
-      - velocity
-
-    state_interfaces:
-      - position
-      - velocity
+    interface_name: position

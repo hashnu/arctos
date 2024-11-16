@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(arctos)
 
+set(CMAKE_CXX_STANDARD 20)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -13,22 +14,25 @@ find_package(ament_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rcpputils REQUIRED)
 find_package(hardware_interface REQUIRED)
-find_package(controller_interface REQUIRED)
 find_package(realtime_tools REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(controller_manager REQUIRED)
+find_package(canary REQUIRED)
+find_package(Boost REQUIRED)
+
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty/libsockcanpp)
 
 add_library(
   ${PROJECT_NAME}
   SHARED
   hardware/${PROJECT_NAME}_hardware.cpp
-  controller/${PROJECT_NAME}_controller.cpp
+  thirdparty/libsockcanpp/src/CanDriver.cpp
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC)
 target_include_directories(${PROJECT_NAME} PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
-$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/controller/include>
+$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/thirdparty/libsockcanpp/include>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 ament_target_dependencies(
@@ -36,11 +40,12 @@ ament_target_dependencies(
   pluginlib
   rcpputils
   hardware_interface
-  controller_interface
   realtime_tools
   trajectory_msgs
   controller_manager
-)
+  canary
+  Boost
+  )
 
 # Export hardware plugins
 pluginlib_export_plugin_description_file(hardware_interface ${PROJECT_NAME}.xml)
@@ -48,6 +53,11 @@ pluginlib_export_plugin_description_file(hardware_interface ${PROJECT_NAME}.xml)
 pluginlib_export_plugin_description_file(controller_interface ${PROJECT_NAME}.xml)
 
 # INSTALL
+install(
+  DIRECTORY thirdparty/libsockcanpp/include
+  DESTINATION include/${PROJECT_NAME}
+)
+
 install(
   DIRECTORY hardware/include/
   DESTINATION include/${PROJECT_NAME}
