@@ -1,24 +1,23 @@
 #include "arctos_hardware/arctos_hardware.hpp"
 #include <string>
 #include <vector>
-#include <vector>
 #include <cmath>
 #include <numeric>
+#include <iostream>
+#include <cstdint>
 
 #include <canary/frame_header.hpp>
 #include <canary/interface_index.hpp>
 #include <canary/raw.hpp>
 #include <canary/socket_options.hpp>
-#include <iostream>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
   
-#include <iostream>
-#include <vector>
-#include <cstdint>
-
 namespace arctos
 {
+
+const std::vector<double> gear_ratios = {13.5,-150.,150.,48.,67.82,67.82};
+const double encoder_resolution = 2*M_PI/(16384);
 
 int get_CRC(int id, const std::vector<uint8_t>& data) {
     int crc = id + std::accumulate(data.begin(), data.end(), 0);
@@ -59,22 +58,18 @@ int64_t vectorToSignedInt46(const std::vector<std::uint8_t>& vec) {
     return result;
 }
 
-int16_t vectorToSignedInt16(const std::vector<std::uint8_t>& vec) {
-    if (vec.size() != 2) { // Ensure the vector has 2 elements for 16-bit integer
-        throw std::invalid_argument("Vector size must be 2 for a 16-bit integer.");
-    }
+std::vector<uint8_t> int32ToByteArray(int32_t value) {
+    std::vector<uint8_t> byteArray(4); // 4 bytes for a 32-bit integer
 
-    // Combine the bytes in big-endian order
-    int16_t result = (static_cast<int16_t>(vec[0]) << 8) | static_cast<int16_t>(vec[1]);
+    if (value<0) {value = -value+8388607};
 
-    // If the sign bit (15th bit) is set, extend the sign bit to ensure it's interpreted as negative
-    if (vec[0] & 0x80) { // Check if the sign bit is set (0x80 = 1000 0000)
-        result |= static_cast<int16_t>(0xFFFF0000); // Extend the sign
-    }
+    // Store each byte in big-endian order
+    byteArray[0] = static_cast<uint8_t>((value >> 16) & 0xFF);
+    byteArray[1] = static_cast<uint8_t>((value >> 8) & 0xFF);
+    byteArray[2] = static_cast<uint8_t>(value & 0xFF);
 
-    return result;
+    return byteArray;
 }
-
 
 
 CallbackReturn RobotSystem::on_init(const hardware_interface::HardwareInfo & info)
@@ -143,13 +138,7 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
 {
 
 
-    /*
-
-    //setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-
-    std::vector<double> gear_ratios = {13.5,-150.,150.,48.,67.82,67.82};
-    double encoder_resolution = 2*M_PI/(16384);
-
+      //setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     boost::asio::io_context ioc;
     // Retrieve the interface index from the interface name
     const auto idx = canary::get_interface_index("can0");
@@ -188,7 +177,7 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
       {
         std::vector<std::uint8_t> encoder_value_data = {cFrame.payload.begin()+1,cFrame.payload.end()-1};
         int64_t encoder_value = vectorToSignedInt46(encoder_value_data);
-        double encoder_value_rad = encoder_value*encoder_resolution/gear_ratios[joint_id];
+        double encoder_value_rad = encoder_value*encoder_resolution/gear_ratios[joint_id-1];
         joint_position_[joint_id-1] = encoder_value_rad;
         //std::cout<<"Joint " << joint_id << " rotation :" << encoder_value_rad << "\n";
       }
@@ -212,21 +201,19 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
       if (check_CRC_4(joint_id,cFrame_payload_4)) 
       {
         int16_t velocity_value = (static_cast<int16_t>(cFrame_payload_4[1]) << 8) | cFrame_payload_4[2];
-        double velocity_value_rad = velocity_value*2*M_PI/60/gear_ratios[joint_id];
+        double velocity_value_rad = velocity_value*2*M_PI/60/gear_ratios[joint_id-1];
         joint_velocities_[joint_id-1] = velocity_value_rad;
       }
       
   }
 
-*/
-
-  for (auto i = 0; i < joint_velocities_command_.size(); i++)
+  for (auto i = 4; i < joint_velocities_command_.size(); i++)
   {
     joint_velocities_[i] = joint_velocities_command_[i];
     joint_position_[i] += joint_velocities_command_[i] * period.seconds();
   }
 
-  for (auto i = 0; i < joint_position_command_.size(); i++)
+  for (auto i = 4; i < joint_position_command_.size(); i++)
   {
     joint_position_[i] = joint_position_command_[i];
   }
@@ -236,6 +223,44 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
 
 return_type RobotSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
+
+  std::vector<double> gear_ratios = {13.5,-150.,150.,48.,67.82,67.82};
+  double encoder_resolution = 2*M_PI/(16384);
+
+  boost::asio::io_context ioc;
+  // Retrieve the interface index from the interface name
+  const auto idx = canary::get_interface_index("can0");
+  // Construct an endpoint using the index
+  auto const ep = canary::raw::endpoint{idx};
+  // Construct and bind a raw CAN frame socket to the endpoint.
+  canary::raw::socket sock{ioc, ep};
+
+  //Frame to get data.
+  struct canFrame
+  {
+      canary::frame_header header;
+      std::array<std::uint8_t, 8> payload;
+  } cFrame;
+
+  cFrame = {};
+
+  for (auto i = 0; i < 4;i++)//joint_position_command_.size(); i++)
+  {
+
+    double encoder_value_double = encoder_value_rad*gear_ratios[joint_id-1]/encoder_resolution;
+    int32_t encoder_int = static_cast<int32_t>(std::round(encoder_value));
+    std::vector<uint8_t> encoder_byte = int32ToByteArray(encoder_int);
+
+
+    int joint_position_command_[i]
+
+            step_in_degree = 1
+        pulses = round(step_in_degree/degre_per_pulses) 
+
+  }
+
+
+
   return return_type::OK;
 }
 
