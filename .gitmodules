@@ -1,0 +1,3 @@
+[submodule "arctos/thirdparty/libsockcanpp"]
+	path = arctos/thirdparty/libsockcanpp
+	url = https://github.com/hashnu/libsockcanpp.git
