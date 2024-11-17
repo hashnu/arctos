@@ -5,9 +5,14 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-forward_position_controller:
+joint_trajectory_controller:
   ros__parameters:
-    type: forward_command_controller/ForwardCommandController
+    type: joint_trajectory_controller/JointTrajectoryController
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
     joints:
       - X_joint
       - Y_joint
@@ -15,4 +20,21 @@ forward_position_controller:
       - A_joint
       - B_joint
       - C_joint
-    interface_name: position
+    action_monitor_rate: 10.0
+    allow_partial_joints_goal: true
+    set_last_command_interface_value_as_state_on_activation: false
+
+position_controller:
+  ros__parameters:
+    type: position_controllers/JointGroupPositionController
+    joints:
+      - X_joint
+      - Y_joint
+      - Z_joint
+      - A_joint
+      - B_joint
+      - C_joint
+
+
+
+
