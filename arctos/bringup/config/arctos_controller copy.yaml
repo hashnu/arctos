@@ -22,6 +22,9 @@ joint_trajectory_controller:
       - X_joint
       - Y_joint
       - Z_joint
+      - A_joint
+      - B_joint
+      - C_joint
     action_monitor_rate: 10.0
     allow_partial_joints_goal: true
     set_last_command_interface_value_as_state_on_activation: false
@@ -32,7 +35,9 @@ position_controller:
       - X_joint
       - Y_joint
       - Z_joint
-
+      - A_joint
+      - B_joint
+      - C_joint
 
 
 

@@ -18,7 +18,7 @@ namespace arctos
 
 const std::vector<double> gear_ratios = {13.5,-150.,150.,48.,67.82,67.82};
 const double encoder_resolution = 2*M_PI/(16384);
-const double joint_rotation_speed_rpm = 1./5;
+const double joint_rotation_speed_rpm = 2./5;
 const uint8_t motor_acceleration = 1;
 const int can_timeout = 100;
 
@@ -163,7 +163,7 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
     cFrame = {};
     uint32_t bit_mask = 0x01;
 
-    for ( int joint_id = 1; joint_id <= 4 ; joint_id++)
+    for ( int joint_id = 1; joint_id <= 3 ; joint_id++)
     {
 
       sock.set_option(canary::filter_if_any{{{
@@ -239,13 +239,13 @@ return_type RobotSystem::read(const rclcpp::Time & /*time*/, const rclcpp::Durat
       }      
   }
 
-  for (auto i = 4; i < joint_velocities_command_.size(); i++)
+  for (auto i = 3; i < joint_velocities_command_.size(); i++)
   {
     joint_velocities_[i] = joint_velocities_command_[i];
     joint_position_[i] += joint_velocities_command_[i] * period.seconds();
   }
 
-  for (auto i = 4; i < joint_position_command_.size(); i++)
+  for (auto i = 3; i < joint_position_command_.size(); i++)
   {
     joint_position_[i] = joint_position_command_[i];
   }
@@ -259,8 +259,8 @@ return_type RobotSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
   setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
   //std::cout << "X joint command:" << joint_position_command_[0] << "\n";
-  std::vector<double> gear_ratios = {13.5,-150.,150.,48.,67.82,67.82};
-  double encoder_resolution = 2*M_PI/(16384);
+  //std::vector<double> gear_ratios = {13.5,150.,150.,48.,67.82,67.82};
+  //double encoder_resolution = 2*M_PI/(16384);
 
   boost::asio::io_context ioc;
   // Retrieve the interface index from the interface name
@@ -280,10 +280,11 @@ return_type RobotSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
   cFrame = {};
 
   if (joint_position_command_.size() > 0) {
-    for (int joint_id = 1; joint_id <= 4;joint_id++)//joint_position_command_.size(); i++)
+    for (int joint_id = 1; joint_id <= 3;joint_id++)//joint_position_command_.size(); i++)
     {
 
-      double encoder_value_double = joint_position_command_[joint_id-1]*gear_ratios[joint_id-1]/encoder_resolution;
+      double encoder_value_double = -joint_position_command_[joint_id-1]*gear_ratios[joint_id-1]/encoder_resolution;
+      if (joint_id==3) { encoder_value_double = -encoder_value_double;}
       int32_t encoder_int = static_cast<int32_t>(std::round(encoder_value_double));
       std::vector<uint8_t> encoder_byte = int32ToByteArray(encoder_int);
 

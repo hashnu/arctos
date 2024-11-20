@@ -11,17 +11,6 @@
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 
-#include <CanDriver.hpp>
-#include <exceptions/CanException.hpp>
-#include <exceptions/CanInitException.hpp>
-#include <exceptions/InvalidSocketException.hpp>
- 
-using sockcanpp::CanDriver;
-using sockcanpp::CanId;
-using sockcanpp::exceptions::CanException;
-using sockcanpp::exceptions::CanInitException;
-using sockcanpp::exceptions::InvalidSocketException;
-using sockcanpp::CanMessage;
 using hardware_interface::return_type;
 
 namespace arctos

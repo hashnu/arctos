@@ -26,13 +26,11 @@ add_library(
   ${PROJECT_NAME}
   SHARED
   hardware/${PROJECT_NAME}_hardware.cpp
-  thirdparty/libsockcanpp/src/CanDriver.cpp
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC)
 target_include_directories(${PROJECT_NAME} PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
-$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/thirdparty/libsockcanpp/include>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 ament_target_dependencies(
@@ -53,11 +51,6 @@ pluginlib_export_plugin_description_file(hardware_interface ${PROJECT_NAME}.xml)
 pluginlib_export_plugin_description_file(controller_interface ${PROJECT_NAME}.xml)
 
 # INSTALL
-install(
-  DIRECTORY thirdparty/libsockcanpp/include
-  DESTINATION include/${PROJECT_NAME}
-)
-
 install(
   DIRECTORY hardware/include/
   DESTINATION include/${PROJECT_NAME}

@@ -10,7 +10,6 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="arctos_arm">
-        <joint name="world_link"/>
         <joint name="X_joint"/>
         <joint name="Y_joint"/>
         <joint name="Z_joint"/>
@@ -27,16 +26,6 @@
         <joint name="Y_joint" value="0"/>
         <joint name="Z_joint" value="0"/>
     </group_state>
-    <group_state name="test" group="arctos_arm">
-        <joint name="A_joint" value="-1.2323"/>
-        <joint name="B_joint" value="1.024"/>
-        <joint name="C_joint" value="0"/>
-        <joint name="X_joint" value="0.9893"/>
-        <joint name="Y_joint" value="0.3992"/>
-        <joint name="Z_joint" value="-0.5033"/>
-    </group_state>
-    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
-    <virtual_joint name="world_link" type="fixed" parent_frame="world" child_link="base_link"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="Link_1_1" link2="Link_2_1" reason="Adjacent"/>
     <disable_collisions link1="Link_1_1" link2="base_link" reason="Adjacent"/>
