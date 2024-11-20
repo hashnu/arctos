@@ -4,7 +4,7 @@ Very early version with hardcoded gear ratio, speed and acceleration in arctos_h
 
 Has been tested on Ros Jazzy Ubuntu 24.04 only.
 
-Can communication need to have [Canary cpp]([opentibiabr/canary: Canary Server 13.x for OpenTibia community.](https://github.com/opentibiabr/canary)) installed.
+Can communication need to have canary can library [canary can library](https://github.com/djarek/canary) installed.
 
 Create a new workspace, clone the repository in src folder and run
 
